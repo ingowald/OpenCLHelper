@@ -16,26 +16,9 @@
 
 #pragma once
 
-#include "common.h"
+#include "device.h"
 
 namespace clHelper {
-
-  /*! C++ wrapper for an OpenCL device object */
-  struct Device {
-
-    Device(const cl_device_id clDeviceID,
-           const size_t platformID,
-           const size_t globalMemSize
-           );
-    
-    /*! platform that this device is on, in our linear ordering. */
-    const size_t platformID;
-    
-    /*! opencl device id */
-    const cl_device_id clDeviceID;
-
-    const size_t globalMemSize;
-  };
 
   /*! C++ wrapper for an OpenCL platform object */
   struct Platform {

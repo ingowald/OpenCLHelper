@@ -18,24 +18,6 @@
 
 namespace clHelper {
 
-#define BUFFER_SIZE 10000
-  
-  /*! helper macro that checks the return value of all MPI_xxx(...)
-    calls via MPI_CALL(xxx(...)).  */
-#define CL_CALL(a) { cl_int rc = cl##a; if (rc != CL_SUCCESS) throw std::runtime_error("opencl call returned error in " STRING(a)); }
-  
-
-  Device::Device(const cl_device_id clDeviceID,
-                 const size_t platformID,
-                 const size_t globalMemSize
-                 )
-    : clDeviceID(clDeviceID),
-      platformID(platformID),
-      globalMemSize(globalMemSize)
-  {
-  }
-  
-  
   /*! query the number of opencl-capable platforms in the system */
   size_t getNumPlatforms()
   {
@@ -60,21 +42,6 @@ namespace clHelper {
       devices(devices)
   {}
 
-  std::shared_ptr<Device> getDeviceInfo(/*! opencl device ID */
-                                        cl_device_id clDeviceID,
-                                        /*! _our_ platform ID (not necessarily same as cl_platform_id */
-                                        size_t platformID)
-  {
-    // -------------------------------------------------------
-    cl_ulong globalMemSize;
-    CL_CALL(GetDeviceInfo(clDeviceID,CL_DEVICE_GLOBAL_MEM_SIZE,
-                            sizeof(globalMemSize),&globalMemSize,NULL));
-
-    // -------------------------------------------------------
-    std::shared_ptr<Device> device = std::make_shared<Device>(clDeviceID,platformID,globalMemSize);
-    return device;
-  }
-  
   std::vector<std::shared_ptr<Device>> queryDevicesForPlatform(cl_platform_id clPlatformID,
                                                                size_t platformID)
   {
@@ -101,27 +68,27 @@ namespace clHelper {
     CL_CALL(GetPlatformIDs(numPlatforms,clPlatformIDs,NULL));
 
     // -------------------------------------------------------
-    char buffer[BUFFER_SIZE];
+    char buffer[CLH_BUFFER_SIZE];
     cl_platform_id clPlatformID = clPlatformIDs[platformID];
 
     // -------------------------------------------------------
-    CL_CALL(GetPlatformInfo(clPlatformID,CL_PLATFORM_PROFILE,BUFFER_SIZE,buffer,NULL));
+    CL_CALL(GetPlatformInfo(clPlatformID,CL_PLATFORM_PROFILE,CLH_BUFFER_SIZE,buffer,NULL));
     const std::string profile = buffer;
     
     // -------------------------------------------------------
-    CL_CALL(GetPlatformInfo(clPlatformID,CL_PLATFORM_VERSION,BUFFER_SIZE,buffer,NULL));
+    CL_CALL(GetPlatformInfo(clPlatformID,CL_PLATFORM_VERSION,CLH_BUFFER_SIZE,buffer,NULL));
     const std::string version = buffer;
     
     // -------------------------------------------------------
-    CL_CALL(GetPlatformInfo(clPlatformID,CL_PLATFORM_VENDOR,BUFFER_SIZE,buffer,NULL));
+    CL_CALL(GetPlatformInfo(clPlatformID,CL_PLATFORM_VENDOR,CLH_BUFFER_SIZE,buffer,NULL));
     const std::string vendor = buffer;
     
     // -------------------------------------------------------
-    CL_CALL(GetPlatformInfo(clPlatformID,CL_PLATFORM_NAME,BUFFER_SIZE,buffer,NULL));
+    CL_CALL(GetPlatformInfo(clPlatformID,CL_PLATFORM_NAME,CLH_BUFFER_SIZE,buffer,NULL));
     const std::string name = buffer;
 
     // -------------------------------------------------------
-    CL_CALL(GetPlatformInfo(clPlatformID,CL_PLATFORM_EXTENSIONS,BUFFER_SIZE,buffer,NULL));
+    CL_CALL(GetPlatformInfo(clPlatformID,CL_PLATFORM_EXTENSIONS,CLH_BUFFER_SIZE,buffer,NULL));
     const std::string extensions = buffer;
 
     // -------------------------------------------------------
