@@ -16,6 +16,12 @@
 
 #pragma once
 
+#ifdef __APPLE__
+#include <OpenCL/opencl.h>
+#else
+#include <CL/cl.h>
+#endif
+
 #include <sys/types.h>
 
 #ifdef __cpluplus
@@ -41,7 +47,7 @@ extern "C" {
     Usage: If your original opencl file (before embedding) was "src/program.cl"
     then that is exactly the string you'll pass to this function.
   */
-char *clhGetEmbeddedOpenCLCode(const char *clFileName, size_t *kernelLength);
+char *clhGetEmbeddedProgram(const char *clFileName, size_t *kernelLength);
   
 #ifdef __cpluplus
 } /* extern C */

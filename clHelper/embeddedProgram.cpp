@@ -21,7 +21,7 @@
 
 namespace clHelper {
 
-  extern "C" char *clhGetEmbeddedOpenCLCode(const char *fileName, size_t *kernelLength)
+  extern "C" char *clhGetEmbeddedProgram(const char *fileName, size_t *kernelLength)
   {
     char kernel_ptr_symbol_name[10000];
     sprintf(kernel_ptr_symbol_name,"_expanded_opencl__%s",fileName);
@@ -39,24 +39,23 @@ namespace clHelper {
     }
 
     void *kernel_ptr_symbol = dlsym(NULL,kernel_ptr_symbol_name);
-    printf("symbol ptr for symbol name %s is %ld\n",kernel_ptr_symbol_name,(size_t)kernel_ptr_symbol);
     if (!kernel_ptr_symbol) return NULL;
     
     void *kernel_len_symbol = dlsym(NULL,kernel_len_symbol_name);
     if (!kernel_len_symbol) return NULL;
     
     *kernelLength = *(unsigned int *)kernel_len_symbol;
+    char *kernel_src = (char *)kernel_ptr_symbol;
     
+#if CLH_PRINT_EMBEDDED_PROGRAM_SOURCE
     printf("(begin sanity check)\n");
     printf("source size: %li\n",*kernelLength);
-    
-    char *kernel_src = (char *)kernel_ptr_symbol;
     
     for (int i=0;i<*kernelLength;i++)
       printf("%c",kernel_src[i]);
     /* printf("%i: %c\n",i,source_str[i]); */
     printf("(end sanity)\n");
-    
+#endif
     return kernel_src;
   }
 
@@ -66,7 +65,7 @@ namespace clHelper {
   std::string getEmbeddedProgram(const std::string &clFileName)
   {
     size_t len;
-    const char *programSrc = clhGetEmbeddedOpenCLCode(clFileName.c_str(),&len);
+    const char *programSrc = clhGetEmbeddedProgram(clFileName.c_str(),&len);
     if (!programSrc)
       throw std::runtime_error("could not find embedded opencl code for '"+clFileName+"'");
     std::stringstream ss;
