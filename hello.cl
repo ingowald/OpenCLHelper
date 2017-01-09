@@ -1,5 +1,3 @@
-#include "test_include.h"
-#include "subdir/test_include.h"
 
 __kernel void hello(__global char* string)
 {
