@@ -36,20 +36,24 @@ SET(OPENCL_ASM_FILES "")
 SET(OPENCL_PTX_FILES "")
 SET(OPENCL_DEP_FILES "")
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-deprecated-declarations")
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated-declarations")
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated-declarations -std=c++11")
 
 MACRO (COMPILE_OPENCL)
   SET(EMBEDDED_OPENCL_KERNELS "")
-
+  
   FOREACH(src ${ARGN})
+
+    GET_FILENAME_COMPONENT(fname ${src} NAME_WE)
+    GET_FILENAME_COMPONENT(abs_path ${CMAKE_CURRENT_SOURCE_DIR}/${src} PATH)
+    GET_FILENAME_COMPONENT(rel_path ${src} PATH)
+    
+    SET(embedded_file ${CMAKE_BINARY_DIR}/.expanded_opencl/${path}/${fname}.c)
+    
     IF (ALREADY_COMPILED_${src})
       # this files is already compiled ... ignore, else we get multiply defined targets
     ELSE()
+
       SET(ALREADY_COMPILED_${src} ON)
-      
-      GET_FILENAME_COMPONENT(fname ${src} NAME_WE)
-      GET_FILENAME_COMPONENT(abs_path ${CMAKE_CURRENT_SOURCE_DIR}/${src} PATH)
-      GET_FILENAME_COMPONENT(rel_path ${src} PATH)
       
       # =======================================================
       # load dependencies from .dep file, IF this exists
@@ -144,7 +148,6 @@ MACRO (COMPILE_OPENCL)
       # command to generate 'embedded' c file that contains the
       # preprocessed kernel as a string
       # ------------------------------------------------------------------
-      SET(embedded_file ${CMAKE_BINARY_DIR}/.expanded_opencl/${path}/${fname}.c)
       ADD_CUSTOM_COMMAND(
 	OUTPUT ${embedded_file}
 	COMMAND xxd 
@@ -154,8 +157,8 @@ MACRO (COMPILE_OPENCL)
 	#      DEPENDS ${preprocessed_file} ${asm_file} ${deps}
 	COMMENT "embedded opencl code from ${src} -> ${embedded_file}"
 	)
-      SET(EMBEDDED_OPENCL_KERNELS ${EMBEDDED_OPENCL_KERNELS} ${embedded_file})
     ENDIF() # already compiled
+    SET(EMBEDDED_OPENCL_KERNELS ${EMBEDDED_OPENCL_KERNELS} ${embedded_file})
   ENDFOREACH()
 ENDMACRO()
 

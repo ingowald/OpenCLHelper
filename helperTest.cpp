@@ -2,6 +2,7 @@
 #include <stdlib.h>
      
 #include "clHelper/embeddedProgram.h"
+#include "clHelper/platform.h"
 
 #define MEM_SIZE (128)
 #define MAX_SOURCE_SIZE (0x100000)
