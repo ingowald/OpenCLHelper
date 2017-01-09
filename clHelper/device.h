@@ -24,9 +24,7 @@ namespace clHelper {
   struct Device {
 
     Device(const cl_device_id clDeviceID,
-           const size_t platformID,
-           const size_t globalMemSize
-           );
+           const size_t platformID);
     
     /*! platform that this device is on, in our linear ordering. */
     const size_t platformID;
@@ -34,7 +32,13 @@ namespace clHelper {
     /*! opencl device id */
     const cl_device_id clDeviceID;
 
-    const size_t globalMemSize;
+    std::string name;
+    size_t globalMemSize     { (size_t)-1 };
+    size_t localMemSize      { (size_t)-1 };
+    size_t maxMemAllocSize   { (size_t)-1 };
+    size_t maxComputeUnits   { (size_t)-1 };
+    size_t maxWorkGroupSize  { (size_t)-1 };
+    double maxClockFrequency { -1. };
   };
 
   std::shared_ptr<Device> getDeviceInfo(/*! opencl device ID */

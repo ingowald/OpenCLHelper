@@ -47,4 +47,21 @@
     calls via MPI_CALL(xxx(...)).  */
 #define CL_CALL(a) { cl_int rc = cl##a; if (rc != CL_SUCCESS) throw std::runtime_error("opencl call returned error in " STRING(a)); }
   
-
+namespace clHelper {
+  
+  /*! added pretty-print function for large numbers, printing 10000000 as "10M" instead */
+  inline std::string prettyNumber(const size_t s) {
+    const double val = s;
+    char result[100];
+    
+    if      (val >= 1e+18f) sprintf(result,"%.1f%c",val/1e18f,'E');
+    else if (val >= 1e+15f) sprintf(result,"%.1f%c",val/1e15f,'P');
+    else if (val >= 1e+12f) sprintf(result,"%.1f%c",val/1e12f,'T');
+    else if (val >= 1e+09f) sprintf(result,"%.1f%c",val/1e09f,'G');
+    else if (val >= 1e+06f) sprintf(result,"%.1f%c",val/1e06f,'M');
+    else if (val >= 1e+03f) sprintf(result,"%.1f%c",val/1e03f,'k');
+    else sprintf(result,"%lu",s);
+    return result;
+  }
+  
+} // ::clHelper
