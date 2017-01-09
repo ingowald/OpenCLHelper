@@ -16,6 +16,8 @@
 
 #pragma once
 
+#include <sys/types.h>
+
 #ifdef __cpluplus
 #  include <string>
 
@@ -23,7 +25,7 @@ namespace clHelper {
   /*! get a std::string that contains the embedded OpenCL code. If the
     given file name couldn't be found among the embedded opencl codes
     a std::runtime_error will be thrown */
-  std::string getEmbeddedProgram();
+  std::string getEmbeddedProgram(const std::string &clFileName);
 }
 
 extern "C" {
@@ -35,8 +37,11 @@ extern "C" {
     _not_ have to be freed (in fact, trying to free should produce a
     core dump).  If the symbol couldn't be found we will return NULL,
     with 'kernelLength' then being undefined.
+    
+    Usage: If your original opencl file (before embedding) was "src/program.cl"
+    then that is exactly the string you'll pass to this function.
   */
-char *clhGetEmbeddedOpenCLCode(const char *fileName, size_t *kernelLength);
+char *clhGetEmbeddedOpenCLCode(const char *clFileName, size_t *kernelLength);
   
 #ifdef __cpluplus
 } /* extern C */

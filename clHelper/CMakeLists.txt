@@ -1,7 +1,7 @@
 
 
 ADD_LIBRARY(clHelperLib
-  embeddedOpenCL.cpp
+  embeddedProgram.cpp
   )
 TARGET_LINK_LIBRARIES(clHelperLib
   ${OPENCL_LIBRARIES}
