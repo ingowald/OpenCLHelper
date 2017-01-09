@@ -24,7 +24,7 @@
 
 #include <sys/types.h>
 
-#ifdef __cpluplus
+#ifdef __cplusplus
 #  include <string>
 
 namespace clHelper {
@@ -49,6 +49,6 @@ extern "C" {
   */
 char *clhGetEmbeddedProgram(const char *clFileName, size_t *kernelLength);
   
-#ifdef __cpluplus
+#ifdef __cplusplus
 } /* extern C */
 #endif
