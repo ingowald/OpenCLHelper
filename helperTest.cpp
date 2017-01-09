@@ -4,15 +4,19 @@
 #include "clHelper/embeddedProgram.h"
 #include "clHelper/platform.h"
 
-#define MEM_SIZE (128)
-#define MAX_SOURCE_SIZE (0x100000)
-
-/* extern char _expanded_opencl__hello_cl[]; */
-/* extern unsigned int _expanded_opencl__hello_cl_len; */
-
-
 int main()
 {
+#if 1
+  size_t numPlatforms = clHelper::getNumPlatforms();
+  PRINT(numPlatforms);
+  for (int i=0;i<numPlatforms;i++) {
+    std::shared_ptr<clHelper::Platform> platform = clHelper::getPlatformInfo(i);
+    std::cout << "found platform " << platform->nameAndVersion() << std::endl;
+    for (auto device : platform->devices) {
+      std::cout << " - global memory size " << device->globalMemSize << std::endl;
+    }
+  }
+#else
   cl_device_id device_id = NULL;
   cl_context context = NULL;
   cl_command_queue command_queue = NULL;
@@ -90,7 +94,7 @@ int main()
   ret = clReleaseContext(context);
      
   /* free(source_str); */
-     
+#endif     
   return 0;
 }
  
