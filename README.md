@@ -27,11 +27,11 @@ functoins. In particular, this library
   (and thus, embedded) into the application. Ie, cl file
   "myFile.cl" will always be accesible through global symbols
   
-	char myFile_cl[]
+    char myFile_cl[];
 
   and
 
-       int myFile_cl_len
+    int myFile_cl_len;
   .
 - some (optional) c/c++ helper functions to access these
   embedded kernerls.
@@ -41,43 +41,43 @@ Usage
 
 To use this library, do roughly the following in your CMakeLists.txt
 
-   SET(clHelper_DIR <path to this clHelper directory>)
+    SET(clHelper_DIR <path to this clHelper directory>)
+     
+     # this defines all the helper macros
+    INCLUDE(${clHelper_DIR}/clHelper.cmake)
 
-   # this defines all the helper macros
-   INCLUDE(${clHelper_DIR}/clHelper.cmake)
+    # this builds the clHelper library (optional, if you want
+    # to manually access the globally generated symbols)
+    ADD_SUBDIRECTORY(${clHelper_DIR})
 
-   # this builds the clHelper library (optional, if you want
-   # to manually access the globally generated symbols)
-   ADD_SUBDIRECTORY(${clHelper_DIR})
+    # specify include paths for #include's in opencl files:
+    OPENCL_INCLUDE_DIRECTORIES(mySearchPath/subdir1 mySearchPath/subdir2)
 
-   # specify include paths for #include's in opencl files:
-   OPENCL_INCLUDE_DIRECTORIES(mySearchPath/subdir1 mySearchPath/subdir2)
+    # specify global defines for opencl files
+    OPENCL_ADD_DEFINITIONS(-DMY_DEFINE=32)
 
-   # specify global defines for opencl files
-   OPENCL_ADD_DEFINITIONS(-DMY_DEFINE=32)
+    # compile some opencl kernels. This properly preprocessor-exapands
+    # and test-compiles the given .cl files (once to asm, once to llvm),
+    # and puts the preprocessor-expanded code (as a char[] array)
+    # into dedicated .c files (that can be accessed through the
+    # implicit EMBEDDED_OPENCL_KERNELS variable
+    COMPILE_OPENCL(myFile1.cl myFile2.cl)
 
-   # compile some opencl kernels. This properly preprocessor-exapands
-   # and test-compiles the given .cl files (once to asm, once to llvm),
-   # and puts the preprocessor-expanded code (as a char[] array)
-   # into dedicated .c files (that can be accessed through the
-   # implicit EMBEDDED_OPENCL_KERNELS variable
-   COMPILE_OPENCL(myFile1.cl myFile2.cl)
-
-   # build a library/executable that embeds these kernels
-   ADD_LIBRARY(myLib
+    # build a library/executable that embeds these kernels
+    ADD_LIBRARY(myLib
 	myFile1.c myFile2.c
 	${EMBEDDED_OPENCL_KERNELS})
 
 From within the application the embedded kernels can be accessed
 through global variables
 
-	extern char myFile1_cl[];
-	extern int  myFile1_cl_len;
+    extern char myFile1_cl[];
+    extern int  myFile1_cl_len;
 
 or through the clHelper-library (in clHelper/ subdir)
 
-   size_t source_size;
-   const char *source_str = clhGetEmbeddedProgram("myFile1.cl",&source_size);
+    size_t source_size;
+    const char *source_str = clhGetEmbeddedProgram("myFile1.cl",&source_size);
 
 respectively
 
