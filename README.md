@@ -8,10 +8,10 @@ Whehter on is a fan of OpenCL or not, and no matter whatever
 limitations OpenCL may or may not have as a _language_, the key issues
 I stumbled over in my working with OpenCL were actually mostly related
 to the build system - cl kernels only being compiled during runtime,
-the app not finding the right .cl files during runtime, #include's and
-#define's in cl kernels causing problems when running the executable
-from a different directory than intended, compile errors in the
-cl-file only appearing when the cl code is jit'ed during program
+the app not finding the right .cl files during runtime, hash-include's
+and hash-define's in cl kernels causing problems when running the
+executable from a different directory than intended, compile errors in
+the cl-file only appearing when the cl code is jit'ed during program
 execution, etc.
 
 This project aims at fixing this through a set of cmake and c++ helper
@@ -107,7 +107,8 @@ This project comes under MIT license, use as you see fit, without any
 warranties, expressed or implied, whatsoeever. See accompanying
 LICENSE.txt for details.
 
-History
+History1
+
 =======
 
 This project started Jan 2017, to help some experimentatoin with
