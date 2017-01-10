@@ -106,3 +106,14 @@ License
 This project comes under MIT license, use as you see fit, without any
 warranties, expressed or implied, whatsoeever. See accompanying
 LICENSE.txt for details.
+
+History
+=======
+
+This project started Jan 2017, to help some experimentatoin with
+OpenCL.  The cmake build functionality was heavily inspired by - but
+significantly expanded from - the cmake macros the OSPRay project
+introduced to build ISPC files (see https://github.com/ospray/OSPRay,
+and more generally http://www.ospray.org). 
+
+
