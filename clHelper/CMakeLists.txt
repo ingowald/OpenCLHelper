@@ -1,4 +1,4 @@
-
+INCLUDE(clHelper.cmake)
 
 ADD_LIBRARY(clHelperLib
   embeddedProgram.cpp
@@ -6,6 +6,6 @@ ADD_LIBRARY(clHelperLib
   platform.cpp
   )
 TARGET_LINK_LIBRARIES(clHelperLib
-  ${OPENCL_LIBRARIES}
+  ${OpenCL_LIBRARY}
   dl
   )

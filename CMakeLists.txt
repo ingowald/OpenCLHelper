@@ -1,7 +1,7 @@
 PROJECT(luk-xmr-miner)
 cmake_minimum_required(VERSION 2.6)
 
-INCLUDE(clHelper/opencl.cmake)
+INCLUDE(clHelper/clHelper.cmake)
 ADD_SUBDIRECTORY(clHelper)
 
 COMPILE_OPENCL(hello.cl)
