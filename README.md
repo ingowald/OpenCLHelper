@@ -1,5 +1,5 @@
 OpenCL-Helpers - Some Helper Infrastructure for building OpenCL based Projects w/ CMake
----------------------------------------------------------------------------------------
+=======================================================================================
 
 Introduction
 ============
@@ -15,7 +15,7 @@ the cl-file only appearing when the cl code is jit'ed during program
 execution, etc.
 
 This project aims at fixing this through a set of cmake and c++ helper
-functoins. In particular, this library
+functions. In particular, this library
 
 - allows for build-time (pre-)compilation of all opencl-kernels
 - proper preprocessor-expansion (#include, #ifdef, ...) during
@@ -43,7 +43,7 @@ To use this library, do roughly the following in your CMakeLists.txt
 
     SET(clHelper_DIR <path to this clHelper directory>)
      
-     # this defines all the helper macros
+    # this defines all the helper macros
     INCLUDE(${clHelper_DIR}/clHelper.cmake)
 
     # this builds the clHelper library (optional, if you want
@@ -100,6 +100,7 @@ To use this project you need
 - for he c++ clHelper library: some sort of OpenCL runtime and devel files
   (ie, libOpenCL.so and CL/OpenCL.h) in a way that CMake's FindOpenCL can find it.
 
+
 License
 =======
 
@@ -107,8 +108,8 @@ This project comes under MIT license, use as you see fit, without any
 warranties, expressed or implied, whatsoeever. See accompanying
 LICENSE.txt for details.
 
-History1
 
+History
 =======
 
 This project started Jan 2017, to help some experimentatoin with
