@@ -25,6 +25,8 @@ namespace clHelper {
 
     Device(const cl_device_id clDeviceID,
            const size_t platformID);
+
+    void print(const std::string &indent="", std::ostream &out = std::cout);
     
     /*! platform that this device is on, in our linear ordering. */
     const size_t platformID;
@@ -34,10 +36,14 @@ namespace clHelper {
 
     std::string name;
     size_t globalMemSize     { (size_t)-1 };
+    size_t globalCacheSize   { (size_t)-1 };
+    size_t cacheLineSize     { (size_t)-1 };
     size_t localMemSize      { (size_t)-1 };
     size_t maxMemAllocSize   { (size_t)-1 };
     size_t maxComputeUnits   { (size_t)-1 };
     size_t maxWorkGroupSize  { (size_t)-1 };
+    size_t vectorWidthInt    { (size_t)-1 };
+
     double maxClockFrequency { -1. };
   };
 

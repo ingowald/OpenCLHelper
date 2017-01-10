@@ -8,16 +8,17 @@ int main()
 {
 #if 1
   size_t numPlatforms = clHelper::getNumPlatforms();
-  PRINT(numPlatforms);
+  std::cout << "number of platforms: " << numPlatforms << std::endl;
   for (int i=0;i<numPlatforms;i++) {
     std::cout << "-------------------------------------------------------" << std::endl;
     std::shared_ptr<clHelper::Platform> platform = clHelper::getPlatformInfo(i);
     std::cout << "found platform " << platform->nameAndVersion() << std::endl;
+    std::cout << "   num devices " << platform->devices.size() << std::endl;
     for (auto device : platform->devices) {
-      std::cout << " - global memory size " << device->globalMemSize << std::endl;
+      device->print("   ");
     }
-    std::cout << "-------------------------------------------------------" << std::endl;
   }
+  std::cout << "-------------------------------------------------------" << std::endl;
 #else
   cl_device_id device_id = NULL;
   cl_context context = NULL;

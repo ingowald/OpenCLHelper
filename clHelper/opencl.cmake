@@ -110,6 +110,7 @@ MACRO (COMPILE_OPENCL)
       SET(preprocessed_file ${CMAKE_BINARY_DIR}/.expanded_opencl/${path}/${fname}.cl)
       ADD_CUSTOM_COMMAND(
 	OUTPUT ${preprocessed_file}
+	COMMAND rm -f ${preprocessed_file}
 	COMMAND ${C_PREPROCESSOR}
 	#      -P
 	${OPENCL_INCLUDE_DIRS}
@@ -127,22 +128,26 @@ MACRO (COMPILE_OPENCL)
       # than only during runtime of the final program. Also useful for
       # inspecing the generated asm code, obviously.
       # ------------------------------------------------------------------
+      SET(ASM_DEPENDENCY "")
       IF (INTEL_OPENCL_COMPILER)
 	# command to generate a cmdline-compiled '.s' file
 	SET(asm_file ${CMAKE_BINARY_DIR}/.expanded_opencl/${path}/${fname}.s)
+	SET(ASM_DEPENDENCY ${asm_file})
 	ADD_CUSTOM_COMMAND(
 	  OUTPUT ${asm_file}
+	  COMMAND rm -f ${asm_file}
 	  COMMAND ${INTEL_OPENCL_COMPILER}
-	  -cmd=build
-	  -input=${preprocessed_file}
+	  -cmd=compile
+	  -input=.expanded_opencl/${path}/${fname}.cl
 	  -asm=${asm_file}
 	  DEPENDS ${preprocessed_file} ${deps}
 	  COMMENT "OpenCL-compiling ${preprocessed_file} -> ${asm_file}"
 	  COMMENT "(this is done as a sanity check to make sure opencl understands this code)"
 	  )
 	SET(OPENCL_ASM_FILES ${OPENCL_ASM_FILES} ${asm_file})
-	ADD_CUSTOM_TARGET(opencl_asm_files_${src} ALL DEPENDS ${OPENCL_ASM_FILES})
+	ADD_CUSTOM_TARGET(opencl_asm_files_${src} ALL DEPENDS ${asm-file})
       ENDIF()
+      message("asm dependency file ${ASM_DEPENDENCY}")
 
       # ------------------------------------------------------------------
       # command to generate 'embedded' c file that contains the
@@ -155,8 +160,10 @@ MACRO (COMPILE_OPENCL)
 	${embedded_file}
 	DEPENDS ${preprocessed_file} ${deps}
 	#      DEPENDS ${preprocessed_file} ${asm_file} ${deps}
-	COMMENT "embedded opencl code from ${src} -> ${embedded_file}"
+	COMMENT "embedding opencl code from ${src} -> ${embedded_file}"
+	DEPENDS ${ASM_DEPENDENCY} ${preprocessed_file}
 	)
+      message("output ${embedded_file} depends on ${ASM_DEPENDENCY} ${preprocessed_file}")
     ENDIF() # already compiled
     SET(EMBEDDED_OPENCL_KERNELS ${EMBEDDED_OPENCL_KERNELS} ${embedded_file})
   ENDFOREACH()

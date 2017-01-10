@@ -1,4 +1,5 @@
 
+
 __kernel void hello(__global char* string)
 {
   string[0] = 'H';

@@ -32,58 +32,80 @@ namespace clHelper {
   {
     std::shared_ptr<Device> device
       = std::make_shared<Device>(clDeviceID,platformID);
-    PRINT(clDeviceID);
 
     char buffer[CLH_BUFFER_SIZE];
     
     // -------------------------------------------------------
     CL_CALL(GetDeviceInfo(clDeviceID,CL_DEVICE_GLOBAL_MEM_SIZE,
                             sizeof(device->globalMemSize),&device->globalMemSize,NULL));
-    PRINT(prettyNumber(device->globalMemSize));
+
+    // -------------------------------------------------------
+    CL_CALL(GetDeviceInfo(clDeviceID,CL_DEVICE_GLOBAL_MEM_CACHE_SIZE,
+                            sizeof(device->globalCacheSize),&device->globalCacheSize,NULL));
 
     // -------------------------------------------------------
     CL_CALL(GetDeviceInfo(clDeviceID,CL_DEVICE_LOCAL_MEM_SIZE,
                             sizeof(device->localMemSize),&device->localMemSize,NULL));
-    PRINT(prettyNumber(device->localMemSize));
 
     // -------------------------------------------------------
     CL_CALL(GetDeviceInfo(clDeviceID,CL_DEVICE_MAX_MEM_ALLOC_SIZE,
                             sizeof(device->maxMemAllocSize),&device->maxMemAllocSize,NULL));
-    PRINT(prettyNumber(device->maxMemAllocSize));
 
     // -------------------------------------------------------
     cl_uint maxComputeUnits;
     CL_CALL(GetDeviceInfo(clDeviceID,CL_DEVICE_MAX_COMPUTE_UNITS,
                             sizeof(maxComputeUnits),&maxComputeUnits,NULL));
     device->maxComputeUnits = maxComputeUnits;
-    PRINT(device->maxComputeUnits);
-    PRINT(prettyNumber(device->maxComputeUnits));
 
     // -------------------------------------------------------
     cl_uint maxClockFrequency;
     CL_CALL(GetDeviceInfo(clDeviceID,CL_DEVICE_MAX_CLOCK_FREQUENCY,
                             sizeof(maxClockFrequency),&maxClockFrequency,NULL));
-    device->maxClockFrequency = maxClockFrequency * 1024. * 1024.;
-    PRINT(device->maxClockFrequency);
-    PRINT(prettyNumber(device->maxClockFrequency));
+    device->maxClockFrequency = maxClockFrequency * (1024. * 1024.);
+
+    // -------------------------------------------------------
+    cl_uint vectorWidthInt;
+    CL_CALL(GetDeviceInfo(clDeviceID,CL_DEVICE_PREFERRED_VECTOR_WIDTH_INT,
+                          sizeof(vectorWidthInt),&vectorWidthInt,NULL));
+    device->vectorWidthInt = vectorWidthInt;
+
+    // -------------------------------------------------------
+    cl_uint cacheLineSize;
+    CL_CALL(GetDeviceInfo(clDeviceID,CL_DEVICE_GLOBAL_MEM_CACHELINE_SIZE,
+                            sizeof(cacheLineSize),&cacheLineSize,NULL));
+    device->cacheLineSize = cacheLineSize;
 
     // -------------------------------------------------------
     size_t maxWorkGroupSize;
     CL_CALL(GetDeviceInfo(clDeviceID,CL_DEVICE_MAX_WORK_GROUP_SIZE,
                             sizeof(maxWorkGroupSize),&maxWorkGroupSize,NULL));
     device->maxWorkGroupSize = maxWorkGroupSize;
-    PRINT(device->maxWorkGroupSize);
-    PRINT(prettyNumber(device->maxWorkGroupSize));
 
     // -------------------------------------------------------
     CL_CALL(GetDeviceInfo(clDeviceID,CL_DEVICE_NAME,
                           CLH_BUFFER_SIZE,buffer,NULL));
     device->name = buffer;
-    PRINT(device->name);
 
     // -------------------------------------------------------
     return device;
   }
+
+  void Device::print(const std::string &indent, std::ostream &out)
+  {
+    out << indent << "Device '" << name << "' (on platform #" << platformID << ")" << std::endl;
+    // out << indent << "  name       : " << name << std::endl;
+    out << indent << "  memory     : "
+        << prettyNumber(globalMemSize) << "B global, "
+        << prettyNumber(localMemSize) << "B local." << std::endl;
+    out << indent << "  cache      : "
+        << prettyNumber(globalCacheSize) << "B global, in cache lines of "
+        << prettyNumber(cacheLineSize) << "Bs" << std::endl;
+    out << indent << "  max malloc : "
+        << prettyNumber(maxMemAllocSize) << "B" << std::endl;
+    out << indent << "  max freq   : " << prettyNumber(maxClockFrequency) << "Hz" << std::endl;
+    out << indent << "  compute    : " << maxComputeUnits << " cores @" << prettyNumber(maxClockFrequency) << "Hz (max), vector width of " << vectorWidthInt << " ints" << std::endl;
+  }
+  
   
 } // ::clHelper
 

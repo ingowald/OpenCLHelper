@@ -32,7 +32,7 @@ int main()
   size_t source_size;
   const char *source_str = clhGetEmbeddedProgram("hello.cl",&source_size);
   if (!source_str) {
-    printf("could not find embedded program 'hello.cl'");
+    printf("could not find embedded program 'hello.cl'\n");
     exit(1);
   }
      

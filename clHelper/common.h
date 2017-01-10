@@ -49,9 +49,23 @@
   
 namespace clHelper {
   
+  // /*! added pretty-print function for large numbers, printing 10000000 as "10M" instead */
+  // inline std::string prettyNumber(const size_t s) {
+  //   const double val = s;
+  //   char result[100];
+    
+  //   if      (val >= 1e+18f) sprintf(result,"%.1f%c",val/1e18f,'E');
+  //   else if (val >= 1e+15f) sprintf(result,"%.1f%c",val/1e15f,'P');
+  //   else if (val >= 1e+12f) sprintf(result,"%.1f%c",val/1e12f,'T');
+  //   else if (val >= 1e+09f) sprintf(result,"%.1f%c",val/1e09f,'G');
+  //   else if (val >= 1e+06f) sprintf(result,"%.1f%c",val/1e06f,'M');
+  //   else if (val >= 1e+03f) sprintf(result,"%.1f%c",val/1e03f,'k');
+  //   else sprintf(result,"%lu",s);
+  //   return result;
+  // }
+
   /*! added pretty-print function for large numbers, printing 10000000 as "10M" instead */
-  inline std::string prettyNumber(const size_t s) {
-    const double val = s;
+  inline std::string prettyMetric(const double val) {
     char result[100];
     
     if      (val >= 1e+18f) sprintf(result,"%.1f%c",val/1e18f,'E');
@@ -60,7 +74,28 @@ namespace clHelper {
     else if (val >= 1e+09f) sprintf(result,"%.1f%c",val/1e09f,'G');
     else if (val >= 1e+06f) sprintf(result,"%.1f%c",val/1e06f,'M');
     else if (val >= 1e+03f) sprintf(result,"%.1f%c",val/1e03f,'k');
-    else sprintf(result,"%lu",s);
+    else sprintf(result,"%lu",(size_t)val);
+    return result;
+  }
+
+  /*! added pretty-print function for large numbers, printing 10000000 as "10M" instead */
+  inline std::string prettyNumber(const double val) {
+    char result[100];
+
+    const double kilo = 1024.;
+    const double mega = 1024.*kilo;
+    const double giga = 1024.*mega;
+    const double tera = 1024.*giga;
+    const double peta = 1024.*tera;
+    const double exa  = 1024.*peta;
+
+    if      (val >= exa) sprintf(result,"%.1f%c",val/exa,'E');
+    else if (val >= peta) sprintf(result,"%.1f%c",val/peta,'P');
+    else if (val >= tera) sprintf(result,"%.1f%c",val/tera,'T');
+    else if (val >= giga) sprintf(result,"%.1f%c",val/giga,'G');
+    else if (val >= mega) sprintf(result,"%.1f%c",val/mega,'M');
+    else if (val >= kilo) sprintf(result,"%.1f%c",val/kilo,'k');
+    else sprintf(result,"%lu",(size_t)val);
     return result;
   }
   
