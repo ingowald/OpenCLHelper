@@ -89,6 +89,17 @@ and embedded in the generated executable. Ie, the executable can be
 called from any directory, and can be shipped without the .cl files.
 
 
+Dependencies
+============
+
+To use this project you need
+
+- a reasonably new version of CMake
+- a c++-11 capable compiler (for the clHlper lib only, *not* for the cmake tools)
+- a opencl-capable from of clang, in your path
+- for he c++ clHelper library: some sort of OpenCL runtime and devel files
+  (ie, libOpenCL.so and CL/OpenCL.h) in a way that CMake's FindOpenCL can find it.
+
 License
 =======
 

@@ -1,26 +1,21 @@
 PROJECT(clHelper-Tools)
 cmake_minimum_required(VERSION 2.6)
 
-INCLUDE(clHelper/clHelper.cmake)
-ADD_SUBDIRECTORY(clHelper)
+SET(clHelper_DIR ${CMAKE_CURRENT_SOURCE_DIR}/clHelper)
 
-COMPILE_OPENCL(hello.cl)
-ADD_EXECUTABLE(hello
-  hello.c
-  ${EMBEDDED_OPENCL_KERNELS}
-  )
-TARGET_LINK_LIBRARIES(hello
-  clHelperLib
-  )
+ADD_SUBDIRECTORY(${clHelper_DIR})
 
-COMPILE_OPENCL(hello.cl)
-ADD_EXECUTABLE(helperTest
-  helperTest.cpp
-  ${EMBEDDED_OPENCL_KERNELS}
-  )
-TARGET_LINK_LIBRARIES(helperTest
-  clHelperLib
-  )
+
+ADD_SUBDIRECTORY(examples)
+
+#COMPILE_OPENCL(hello.cl)
+#ADD_EXECUTABLE(helperTest
+#  helperTest.cpp
+#  ${EMBEDDED_OPENCL_KERNELS}
+#  )
+#TARGET_LINK_LIBRARIES(helperTest
+#  clHelperLib
+#  )
 
 
 
