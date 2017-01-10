@@ -26,13 +26,13 @@ functoins. In particular, this library
   as global char[] arrays in .c files that can be linked
   (and thus, embedded) into the application. Ie, cl file
   "myFile.cl" will always be accesible through global symbols
-  
-    char myFile_cl[];
+
+        char myFile_cl[];
 
   and
 
-    int myFile_cl_len;
-  .
+        int myFile_cl_len;
+
 - some (optional) c/c++ helper functions to access these
   embedded kernerls.
 
