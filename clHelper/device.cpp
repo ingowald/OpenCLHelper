@@ -15,6 +15,7 @@
 // ======================================================================== //
 
 #include "device.h"
+#include "platform.h"
 
 namespace clHelper {
 
@@ -106,6 +107,18 @@ namespace clHelper {
     out << indent << "  compute    : " << maxComputeUnits << " cores @" << prettyNumber(maxClockFrequency) << "Hz (max), vector width of " << vectorWidthInt << " ints" << std::endl;
   }
   
-  
+  /*! get a list of all devices found in the system */
+  std::vector<std::shared_ptr<Device>> getAllDevices()
+  {
+    std::vector<std::shared_ptr<Device>> ret;
+    size_t numPlatforms = getNumPlatforms();
+    for (int pID=0;pID<numPlatforms;pID++) {
+      std::shared_ptr<Platform> platform = getPlatformInfo(pID);
+      for (auto device : platform->devices)
+        ret.push_back(device);
+    }
+    return ret;
+  }
+
 } // ::clHelper
 

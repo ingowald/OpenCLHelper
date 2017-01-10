@@ -20,12 +20,17 @@
 
 namespace clHelper {
 
+  struct DeviceBuffer;
+  
   /*! C++ wrapper for an OpenCL device object */
   struct Device {
 
     Device(const cl_device_id clDeviceID,
            const size_t platformID);
 
+    /*! c++ wrappers for opencl buffer objects - not yet implemented */
+    // std::shared_ptr<DeviceBuffer> createRawBuffer(size_t size) { return nullptr; };
+    
     void print(const std::string &indent="", std::ostream &out = std::cout);
     
     /*! platform that this device is on, in our linear ordering. */
@@ -51,6 +56,8 @@ namespace clHelper {
                                         cl_device_id clDeviceID,
                                         /*! _our_ platform ID (not necessarily same as cl_platform_id */
                                         size_t platformID);
-    
+
+  /*! get a list of all devices found in the system */
+  std::vector<std::shared_ptr<Device>> getAllDevices();
 } // ::clHelper
 
