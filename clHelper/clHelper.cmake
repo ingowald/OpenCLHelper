@@ -21,7 +21,7 @@
 # find basic opencl runtime components
 # ------------------------------------------------------------------
 FIND_PACKAGE(OpenCL REQUIRED)
-IF (NOT OpenCL-FOUND)
+IF (NOT OpenCL_INCLUDE_DIRS)
   MESSAGE(ERROR "OpenCL runtime not found")
 ENDIF()
 INCLUDE_DIRECTORIES(${OpenCL_INCLUDE_DIRS})
@@ -105,7 +105,7 @@ MACRO (COMPILE_OPENCL)
     SET(dep_file ${clhelper_output_dir}/${fname}.dep)
 
     # the c-preprocessor output of the input file (generated using clang -E)
-    SET(preproc_file ${clhelper_output_dir}/${fname}.c)
+    SET(preproc_file ${clhelper_output_dir}/${fname}.cl)
 
     # the .ll and .s files we generate using clang's opencl compiler
     SET(ll_file ${clhelper_output_dir}/${fname}.ll)
@@ -155,23 +155,19 @@ MACRO (COMPILE_OPENCL)
       # command to (re-)_generate_ a 'dep' file. this file is mainly
       # used for dependency tracking during build
       # ------------------------------------------------------------------
-#      GET_FILENAME_COMPONENT(dep_file_path ${dep_file} PATH)
-#      SET(input_file ${abs_path}/${fname}.cl)
-#      FILE(RELATIVE_PATH rel_input_file ${clhelper_dir} ${input_file}
+      FILE(RELATIVE_PATH rel_dep_file ${CMAKE_BINARY_DIR} ${dep_file})
       ADD_CUSTOM_COMMAND(
 	OUTPUT ${dep_file}
+	COMMAND ${CMAKE_COMMAND} -E make_directory ${clhelper_output_dir}
 	COMMAND ${CLANG_COMPILER} -MM
 	${CLHELPER_INCLUDE_DIRS}
 	${CLHELPER_DEFINITIONS}
 	${input_file}
 	-o ${dep_file}
-	DEPENDS ${clhelper_output_dir} ${input_file} ${deps}
-	COMMENT "Generated dependencies for ${src} -> ${dep_file}"
+	DEPENDS ${input_file} ${deps}
+	COMMENT "Generated dependencies for ${src} -> ${rel_dep_file}"
 	)
-      #      SET(CLHELPER_DEP_FILES ${CLHELPER_DEP_FILES} ${dep_file})
-      #      ADD_CUSTOM_TARGET(opencl_dep_files_${src} ALL DEPENDS ${CLHELPER_DEP_FILES})
-      #      ADD_CUSTOM_TARGET(opencl_dep_files_${src} ALL DEPENDS ${dep_file))
-      ADD_CUSTOM_TARGET(clhelper_dep_file_for_${src} ALL DEPENDS ${dep_file})
+#      ADD_CUSTOM_TARGET(clhelper_dep_file_for_${src} ALL DEPENDS ${dep_file})
       
       # ------------------------------------------------------------------
       # command to generate a #include-expanded '.cl' file. this is the
@@ -179,6 +175,7 @@ MACRO (COMPILE_OPENCL)
       # #defines's etc expanded. this is the 'program' that actually
       # gets embedded as a compile-time string into the executable
       # ------------------------------------------------------------------
+      FILE(RELATIVE_PATH rel_preproc_file ${CMAKE_BINARY_DIR} ${preproc_file})
       ADD_CUSTOM_COMMAND(
 	OUTPUT ${preproc_file}
 	COMMAND clang -E 
@@ -186,37 +183,35 @@ MACRO (COMPILE_OPENCL)
 	${CLHELPER_DEFINITIONS}
 	${input_file}
 	-o ${preproc_file}
-	DEPENDS clhelper_dep_file_for_${src} ${input_file} ${deps} ${dep_file}
-	COMMENT "Run pre-processor on ${src} -> ${preprocessed_source}"
+	DEPENDS ${input_file} ${deps} ${dep_file}
+	COMMENT "Run pre-processor on ${src} -> ${rel_preproc_file}"
 	)
       
       # ------------------------------------------------------------------
       # command to generate .s output file
       # ------------------------------------------------------------------
+      FILE(RELATIVE_PATH rel_asm_file ${CMAKE_BINARY_DIR} ${asm_file})
       ADD_CUSTOM_COMMAND(
 	OUTPUT ${asm_file}
 	COMMAND clang -S -x cl
 	${preproc_file}
 	-o ${asm_file}
 	DEPENDS ${preproc_file}
-	COMMENT "OpenCL-compiling ${preproc_file} -> ${asm_file}"
-	COMMENT "(this is done as a sanity check to make sure opencl understands this code)"
+	COMMENT "test-compiling ${rel_preproc_file} -> ${rel_asm_file}"
 	)
-      ADD_CUSTOM_TARGET(clhelper_asm_file_for_${src} ALL DEPENDS ${asm_file})
 
       # ------------------------------------------------------------------
       # command to generate .ll output file
       # ------------------------------------------------------------------
+      FILE(RELATIVE_PATH rel_ll_file ${CMAKE_BINARY_DIR} ${ll_file})
       ADD_CUSTOM_COMMAND(
 	OUTPUT ${ll_file}
 	COMMAND clang -S -emit-llvm -x cl
 	${preproc_file}
 	-o ${ll_file}
 	DEPENDS ${preproc_file}
-	COMMENT "OpenCL-compiling ${preproc_file} -> ${ll_file}"
-	COMMENT "(this is done as a sanity check to make sure opencl understands this code)"
+	COMMENT "test-compiling ${rel_preproc_file} -> ${rel_ll_file}"
 	)
-      ADD_CUSTOM_TARGET(clhelper_ll_file_for_${src} ALL DEPENDS ${ll_file})
 
       # ------------------------------------------------------------------
       # command to generate 'embedded' c file that contains the
@@ -225,6 +220,7 @@ MACRO (COMPILE_OPENCL)
       # encodes the entire path of the input file as name of the
       # kernel
       # ------------------------------------------------------------------
+      FILE(RELATIVE_PATH rel_embedded_file ${CMAKE_BINARY_DIR} ${embedded_file})
       FILE(RELATIVE_PATH rel_input ${clhelper_base_output_dir} ${preproc_file})
       message("{embedded_file} ${embedded_file}")
       message("{rel_input} ${rel_input}")
@@ -235,8 +231,8 @@ MACRO (COMPILE_OPENCL)
 	COMMAND xxd 
 	-i ${rel_input}
 	${embedded_file}
-	DEPENDS ${preproc_file} ${deps}
-	COMMENT "embedding opencl code from ${src} -> ${embedded_file}"
+	DEPENDS ${preproc_file} ${deps} ${asm_file} ${ll_file}
+	COMMENT "embedding opencl code from ${src} -> ${rel_embedded_file}"
 	)
     ENDIF() 
     SET(EMBEDDED_OPENCL_KERNELS ${EMBEDDED_OPENCL_KERNELS} ${embedded_file})

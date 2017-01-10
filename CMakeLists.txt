@@ -1,4 +1,4 @@
-PROJECT(luk-xmr-miner)
+PROJECT(clHelper-Tools)
 cmake_minimum_required(VERSION 2.6)
 
 INCLUDE(clHelper/clHelper.cmake)
@@ -12,7 +12,6 @@ ADD_EXECUTABLE(hello
 TARGET_LINK_LIBRARIES(hello
   clHelperLib
   )
-
 
 COMPILE_OPENCL(hello.cl)
 ADD_EXECUTABLE(helperTest

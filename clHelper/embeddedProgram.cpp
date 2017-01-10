@@ -24,10 +24,12 @@ namespace clHelper {
   extern "C" char *clhGetEmbeddedProgram(const char *fileName, size_t *kernelLength)
   {
     char kernel_ptr_symbol_name[10000];
-    sprintf(kernel_ptr_symbol_name,"_expanded_opencl__%s",fileName);
+    sprintf(kernel_ptr_symbol_name,"%s",fileName);
+    // sprintf(kernel_ptr_symbol_name,"_expanded_opencl__%s",fileName);
   
     char kernel_len_symbol_name[10000];
-    sprintf(kernel_len_symbol_name,"_expanded_opencl__%s_len",fileName);
+    // sprintf(kernel_len_symbol_name,"_expanded_opencl__%s_len",fileName);
+    sprintf(kernel_len_symbol_name,"%s_len",fileName);
   
     for (char *s = kernel_ptr_symbol_name; *s; s++) {
       if (*s == '.') *s = '_';
