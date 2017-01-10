@@ -46,6 +46,9 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.  
 */
 
+#include <chrono>
+#include <ctime>
+ 
 #ifdef _MSC_VER
 #define _CRT_SECURE_NO_WARNINGS
 #define NOMINMAX
@@ -71,37 +74,26 @@
 
 #define NSUBSAMPLES        2
 
-extern void ao_serial(int w, int h, int nsubsamples, float image[]);
+struct Image {
+  Image(size_t width, size_t height)
+    : width(width), height(height),
+      pix(new float[3*width*height])
+  {};
+  ~Image() { delete pix; }
+  
+  size_t width, height;
+  float *pix;
 
-static unsigned int test_iterations[] = {3, 7, 1};
-static unsigned int width, height;
-static unsigned char *img;
-static float *fimg;
-
-
-static unsigned char
-clamp(float f)
+  void savePPM(const char *fName);
+};
+  
+void Image::savePPM(const char *fname)
 {
-  int i = (int)(f * 255.5);
-
-  if (i < 0) i = 0;
-  if (i > 255) i = 255;
-
-  return (unsigned char)i;
-}
-
-
-static void
-savePPM(const char *fname, int w, int h)
-{
-  for (int y = 0; y < h; y++) {
-    for (int x = 0; x < w; x++)  {
-      img[3 * (y * w + x) + 0] = clamp(fimg[3 *(y * w + x) + 0]);
-      img[3 * (y * w + x) + 1] = clamp(fimg[3 *(y * w + x) + 1]);
-      img[3 * (y * w + x) + 2] = clamp(fimg[3 *(y * w + x) + 2]);
-    }
+  char *tmp = new char[3*width*height];
+  for (int i=0;i<3*width*height;i++) {
+    tmp[i] = int(std::max(0,std::min(255,int(pix[i]*256.f))));
   }
-
+      
   FILE *fp = fopen(fname, "wb");
   if (!fp) {
     perror(fname);
@@ -109,9 +101,9 @@ savePPM(const char *fname, int w, int h)
   }
 
   fprintf(fp, "P6\n");
-  fprintf(fp, "%d %d\n", w, h);
+  fprintf(fp, "%ld %ld\n", width, height);
   fprintf(fp, "255\n");
-  fwrite(img, w * h * 3, 1, fp);
+  fwrite(tmp, 3*width*height, 1, fp);
   fclose(fp);
   printf("Wrote image file %s\n", fname);
 }
@@ -119,37 +111,18 @@ savePPM(const char *fname, int w, int h)
 
 int main(int argc, char **argv)
 {
-  if (argc < 3) {
-    printf ("%s\n", argv[0]);
-    printf ("Usage: ao [width] [height] [ispc iterations] [tasks iterations] [serial iterations]\n");
-    getchar();
-    exit(-1);
-  }
-  else {
-    if (argc == 6) {
-      for (int i = 0; i < 3; i++) {
-        test_iterations[i] = atoi(argv[3 + i]);
-      }
-    }
-    width = atoi (argv[1]);
-    height = atoi (argv[2]);
-  }
-
-  const std::string source = clHelper::getEmbeddedProgram("aoBench.cl");
+  cl_uint width = 800, height = 600;
+  Image image(width,height);
   
-  // Allocate space for output images
-  img  = new unsigned char[width * height * 3];
-  fimg = new float[width * height * 3];
-
   std::vector<std::shared_ptr<clHelper::Device>> devices
     = clHelper::getAllDevices();
 
   assert(!devices.empty());
   std::shared_ptr<clHelper::Device> device = devices[0];
 
-  
-  // std::shared_ptr<clHelper::DeviceBuffer> deviceImage
-  //   = device->createRawBuffer(width*height*3*sizeof(float));
+  /*! get the opencl source */
+  const std::string source = clHelper::getEmbeddedProgram("aoBench.cl");
+
   /* Create OpenCL context */
   cl_int ret;
   cl_device_id device_id = device->clDeviceID;
@@ -182,7 +155,11 @@ int main(int argc, char **argv)
      
   /* Create OpenCL Kernel */
   cl_kernel kernel = clCreateKernel(program, "aoBench", &ret);
-     
+
+  
+  std::chrono::time_point<std::chrono::system_clock> clock_begin
+    = std::chrono::system_clock::now();
+  
   /* Set OpenCL Kernel Parameters */
   int numSubSamples = 4;
   ret = clSetKernelArg(kernel, 0, sizeof(width),  (void *)&width);
@@ -201,29 +178,16 @@ int main(int argc, char **argv)
      
   /* Copy results from the memory buffer */
   ret = clEnqueueReadBuffer(command_queue, memobj, CL_TRUE, 0,
-                            memSize, fimg, 0, NULL, NULL);
+                            memSize, image.pix, 0, NULL, NULL);
 
+  std::chrono::time_point<std::chrono::system_clock> clock_end
+    = std::chrono::system_clock::now();
+  std::chrono::duration<double> seconds = clock_end-clock_begin;
   
-  // //
-  // // Run the ispc path, test_iterations times, and report the minimum
-  // // time for any of them.
-  // //
-  double minTimeISPC = 1e30;
-  // for (unsigned int i = 0; i < test_iterations[0]; i++) {
-  //   memset((void *)fimg, 0, sizeof(float) * width * height * 3);
-  //   assert(NSUBSAMPLES == 2);
-
-  //   // reset_and_start_timer();
-  //   // ao_ispc(width, height, NSUBSAMPLES, fimg);
-  //   double t = 0.f; //get_elapsed_mcycles();
-  //   printf("@time of ISPC run:\t\t\t[%.3f] million cycles\n", t);
-  //   minTimeISPC = std::min(minTimeISPC, t);
-  // }
-
   // Report results and save image
-  printf("[aobench cl]:\t\t\t[%.3f] million cycles (%d x %d image)\n", 
-         minTimeISPC, width, height);
-  savePPM("ao-cl.ppm", width, height); 
+  std::cout << "[aobench cl]:\t" << seconds.count() << "s "
+            << ", for a " << width << "x" << height << " pixels" << std::endl;
+  image.savePPM("ao-cl.ppm"); 
 
   return 0;
 }

@@ -53,6 +53,13 @@
   Based on Syoyo Fujita's aobench: http://code.google.com/p/aobench
 */
 
+/*! special thanks to
+  - Syoyo Fujita, who apparently created the first aobench that was the root of all this!
+  - Matt Pharr, who's aoBench variant this is based on
+  - the OSPRay Project, and in particular Johannes Guenther, for the random number generator
+ */
+
+
 #define NAO_SAMPLES		8
 #define M_PI 3.1415926535f
 
