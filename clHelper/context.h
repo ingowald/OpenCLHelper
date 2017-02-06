@@ -1,0 +1,148 @@
+// ======================================================================== //
+// Copyright 2017 Ingo Wald                                                 //
+//                                                                          //
+// Licensed under the Apache License, Version 2.0 (the "License");          //
+// you may not use this file except in compliance with the License.         //
+// You may obtain a copy of the License at                                  //
+//                                                                          //
+//     http://www.apache.org/licenses/LICENSE-2.0                           //
+//                                                                          //
+// Unless required by applicable law or agreed to in writing, software      //
+// distributed under the License is distributed on an "AS IS" BASIS,        //
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. //
+// See the License for the specific language governing permissions and      //
+// limitations under the License.                                           //
+// ======================================================================== //
+
+#pragma once
+
+#include "device.h"
+
+/*! c++ wrappers for opencl buffer objects - not yet implemented */
+namespace clHelper {
+
+  struct Context;
+  struct Program;
+  struct KernelArgs;
+
+  struct Kernel : std::enable_shared_from_this<Kernel>  {
+    Kernel(const std::shared_ptr<Program> &program, const char *name);
+    ~Kernel() {
+      throw std::runtime_error("not yet releasing kernel ... ");
+    }
+    void run(const KernelArgs &args);
+
+    std::shared_ptr<Program> program;
+    cl_kernel handle { 0 };
+  };
+  
+  struct Program : std::enable_shared_from_this<Program>  {
+    Program(const std::shared_ptr<Context> &context, const std::string &code);
+    
+    ~Program() {
+      throw std::runtime_error("not yet releasing kernel ... ");
+    }
+
+    cl_program handle { 0 };
+    
+    std::shared_ptr<Kernel> createKernel(const char *name)
+    {
+      return std::make_shared<Kernel>(shared_from_this(),name);
+    }
+
+    std::shared_ptr<Context> context;
+  };
+  
+  /*! abstracts a memory region on the device */
+  struct Context : std::enable_shared_from_this<Context> {
+    
+    Context(const std::shared_ptr<Device> &device)
+    {
+      cl_int ret = 0;
+      assert(device);
+      this->device = device;
+      this->handle = clCreateContext(NULL, 1, &device->clDeviceID, NULL, NULL, &ret);
+      if (ret != CL_SUCCESS)
+        throw std::runtime_error("error in clHelper::Context (from clCreateContext)");
+
+      commandQueue = clCreateCommandQueue(this->handle, device->clDeviceID, 0, &ret); 
+      if (ret != CL_SUCCESS)
+        throw std::runtime_error("error in clHelper::Context (from clCreateCommandQueue)");
+    }
+    
+    ~Context() { throw std::runtime_error("releasing cl contexts not yet implemneted"); }
+    
+    static std::shared_ptr<Context> create(const std::shared_ptr<Device> &device)
+    { return std::make_shared<Context>(device); }
+    
+    std::shared_ptr<Program> createProgram(const std::string &code)
+    {
+      return std::make_shared<Program>(shared_from_this(),code);
+    };
+
+    std::shared_ptr<Device> device;
+    cl_context       handle { 0 };
+    cl_command_queue commandQueue { 0 };
+  };
+  
+
+  inline Kernel::Kernel(const std::shared_ptr<Program> &program, const char *name)
+    : program(program)
+  {
+    cl_int ret;
+    PING;
+    PRINT(name);
+    this->handle = clCreateKernel(program->handle, name, &ret);
+    if (ret != CL_SUCCESS) {
+      PRINT(ret);
+      throw std::runtime_error("error in clHelper::Kernel (clCreateKernel) : "+clErrorString(ret));
+    }
+  }
+
+  
+
+  inline Program::Program(const std::shared_ptr<Context> &context, const std::string &code)
+    : context(context)
+  {
+    const char  *source_str  = code.c_str();
+    const size_t source_size = code.size();
+    cl_int ret;
+    this->handle
+      = clCreateProgramWithSource(context->handle, 1, (const char **)&source_str,
+                                  (const size_t *)&source_size, &ret);
+    if (ret != CL_SUCCESS)
+      throw std::runtime_error("error in clHelper::Program (from clCreateProgramWithSource) : "+clErrorString(ret));
+    /* Build Kernel Program */
+    ret = clBuildProgram(this->handle, 1, &context->device->clDeviceID, NULL, NULL, NULL);
+    if (ret != CL_SUCCESS) {
+      
+      size_t len;
+      char *buffer;
+      clGetProgramBuildInfo(this->handle, context->device->clDeviceID, CL_PROGRAM_BUILD_LOG, 0, NULL, &len);
+      buffer = (char *)malloc(len+1);
+      clGetProgramBuildInfo(this->handle, context->device->clDeviceID, CL_PROGRAM_BUILD_LOG, len, buffer, NULL);
+      printf("%s\n", buffer);
+
+      throw std::runtime_error("error in clHelper::Program (from clBuildProgram) : "+clErrorString(ret));
+    }
+  }
+
+
+
+  struct KernelArgs {
+    KernelArgs() {};
+    KernelArgs &add(const std::shared_ptr<DeviceBuffer> buffer);
+    KernelArgs &add(const void *ptr, size_t size)
+    {
+      const uint8_t *in = (const uint8_t *)ptr;
+      for (int i=0;i<size;i++)
+        argMem.push_back(*in++);
+      argSize.push_back(size);
+      return *this;
+    }
+    
+    std::vector<size_t> argSize;
+    std::vector<uint8_t> argMem;
+  };
+
+}

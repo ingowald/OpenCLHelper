@@ -28,6 +28,7 @@
 #include <iostream>
 #include <memory>
 #include <vector>
+#include <assert.h>
 
 /* debug printing macros */
 #define STRING(x) #x

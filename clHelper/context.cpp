@@ -14,42 +14,43 @@
 // limitations under the License.                                           //
 // ======================================================================== //
 
-#pragma once
+#include "context.h"
+#include "buffer.h"
 
-#include "common.h"
-#ifdef __APPLE__
-#include <OpenCL/opencl.h>
-#else
-#include <CL/cl.h>
-#endif
-
-#include <sys/types.h>
-
-#ifdef __cplusplus
-#  include <string>
-
+/*! c++ wrappers for opencl buffer objects - not yet implemented */
 namespace clHelper {
-  /*! get a std::string that contains the embedded OpenCL code. If the
-    given file name couldn't be found among the embedded opencl codes
-    a std::runtime_error will be thrown */
-  std::string getEmbeddedProgram(const std::string &clFileName);
+
+  KernelArgs &KernelArgs::add(const std::shared_ptr<DeviceBuffer> buffer)
+  {
+    return add(&buffer->handle,sizeof(buffer->handle));
+  }
+  
+void Kernel::run(const KernelArgs &args)
+  {
+    cl_int ret;
+    const unsigned char *in = args.argMem.data();
+    for (int i=0;i<args.argSize.size();i++) {
+      size_t sz_i = args.argSize[i];
+      ret = clSetKernelArg(handle, i, sz_i,  (void *)in);
+      if (ret != CL_SUCCESS)
+        throw std::runtime_error("error in clHelper::Kernel::run (clSetKernelArgs) : "+clErrorString(ret));
+      in += sz_i;
+    };
+
+    size_t width = 1;
+    size_t height = 1;
+    size_t global_work_size[2] = { width, height };
+    // size_t local_work_size[2] = { 8, 8 };
+    ret = clEnqueueNDRangeKernel(program->context->commandQueue, this->handle, 2,
+                                 NULL, global_work_size, NULL,
+                                 0, NULL, NULL);
+    if (ret != CL_SUCCESS)
+        throw std::runtime_error("error in clHelper::Kernel::run (clEnqueueNDRangeKernel)");
+    PING;
+    PRINT(args.argSize.size());
+  }
+  
+
 }
 
-extern "C" {
-#endif
-  
-  /*! get a pointer to the embedded OpenCL code, as well as the length
-    of that opencl code (in *kernelLen).  Since the opencl code is
-    embedded into the program executable the resulting pointer does
-    _not_ have to be freed (in fact, trying to free should produce a
-    core dump).  If the symbol couldn't be found we will return NULL,
-    with 'kernelLength' then being undefined.
-    
-    Usage: If your original opencl file (before embedding) was "src/program.cl"
-    then that is exactly the string you'll pass to this function.
-  */
-char *clhGetEmbeddedProgram(const char *clFileName, size_t *kernelLength);
-  
-#ifdef __cplusplus
-} /* extern C */
-#endif
+

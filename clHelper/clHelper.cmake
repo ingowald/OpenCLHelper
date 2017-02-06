@@ -44,6 +44,12 @@ IF (#(NOT INTEL_OPENCL_COMPILER) AND
   MESSAGE("Will not be able to do command-line compilation (but runtime may still work)")
 ENDIF()
 
+FIND_PROGRAM(INTEL_OPENCL_COMPILER "ioc64" DOC "intel opencl cmd-line compiler")
+
+IF (NOT INTEL_OPENCL_COMPILER)
+  MESSAGE("Could not find intel OpenCL compiler (ioc64).")
+ENDIF()
+
 # ------------------------------------------------------------------
 # list of all directories the user specified for his opencl kernels
 # (using OPENCL_INCLUDE_DIRECTORIES(<dir>)
@@ -178,7 +184,7 @@ MACRO (COMPILE_OPENCL)
       FILE(RELATIVE_PATH rel_preproc_file ${CMAKE_BINARY_DIR} ${preproc_file})
       ADD_CUSTOM_COMMAND(
 	OUTPUT ${preproc_file}
-	COMMAND clang -E 
+	COMMAND clang -E -DCLANG_OPENCL
 	${CLHELPER_INCLUDE_DIRS}
 	${CLHELPER_DEFINITIONS}
 	${input_file}
@@ -193,9 +199,10 @@ MACRO (COMPILE_OPENCL)
       FILE(RELATIVE_PATH rel_asm_file ${CMAKE_BINARY_DIR} ${asm_file})
       ADD_CUSTOM_COMMAND(
 	OUTPUT ${asm_file}
-	COMMAND clang -S -x cl
-	${preproc_file}
-	-o ${asm_file}
+	COMMAND ${INTEL_OPENCL_COMPILER}
+	-cmd=build
+	-input=${preproc_file}
+	-asm=${asm_file}
 	DEPENDS ${preproc_file}
 	COMMENT "test-compiling ${rel_preproc_file} -> ${rel_asm_file}"
 	)
@@ -206,9 +213,10 @@ MACRO (COMPILE_OPENCL)
       FILE(RELATIVE_PATH rel_ll_file ${CMAKE_BINARY_DIR} ${ll_file})
       ADD_CUSTOM_COMMAND(
 	OUTPUT ${ll_file}
-	COMMAND clang -S -emit-llvm -x cl
-	${preproc_file}
-	-o ${ll_file}
+	COMMAND ${INTEL_OPENCL_COMPILER}
+	-cmd=build
+	-input=${preproc_file}
+	-llvm=${ll_file}
 	DEPENDS ${preproc_file}
 	COMMENT "test-compiling ${rel_preproc_file} -> ${rel_ll_file}"
 	)

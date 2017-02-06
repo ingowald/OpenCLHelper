@@ -17,13 +17,16 @@
 #pragma once
 
 #include "common.h"
+#include <memory>
 
 namespace clHelper {
+
+  std::string clErrorString(cl_int error);
 
   struct DeviceBuffer;
   
   /*! C++ wrapper for an OpenCL device object */
-  struct Device {
+  struct Device : public std::enable_shared_from_this<Device> {
 
     Device(const cl_device_id clDeviceID,
            const size_t platformID);

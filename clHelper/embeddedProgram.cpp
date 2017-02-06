@@ -39,7 +39,7 @@ namespace clHelper {
       if (*s == '.') *s = '_';
       if (*s == '/') *s = '_';
     }
-
+    
     void *kernel_ptr_symbol = dlsym(NULL,kernel_ptr_symbol_name);
     if (!kernel_ptr_symbol) return NULL;
     

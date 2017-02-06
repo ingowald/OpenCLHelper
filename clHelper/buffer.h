@@ -17,12 +17,36 @@
 #pragma once
 
 #include "device.h"
+#include "context.h"
 
 /*! c++ wrappers for opencl buffer objects - not yet implemented */
 namespace clHelper {
+
+  /*! abstracts a memory region on the device */
+  struct DeviceBuffer {
+    /*! create a read/write memory buffer of given size (in given
+        context), or throw exception of not possible */
+    DeviceBuffer(const std::shared_ptr<Context> &context,
+                 const size_t size);
+
+    /*! destroy the device-size buffer */
+    ~DeviceBuffer() { throw std::runtime_error("releasing buffers not yet implemneted"); }
+
+    /*! write given data into the buffer - size must match buffer size */
+    void write(const void *data, size_t size);
+
+    /*! read buffer content into given hist-side array. buffer and array sizes must match */
+    void read(void *data, size_t size);
+    
+
+    static std::shared_ptr<DeviceBuffer> create(const std::shared_ptr<Context> &context,
+                                                const size_t size);
+
+    //! the context we were created with - need this to access the command queue etc
+    std::shared_ptr<Context> context;
+    cl_mem handle { 0 };
+  };
   
-  // struct DeviceBuffer {
-  // };
 
 }
 
