@@ -86,47 +86,6 @@ namespace clHelper {
   };
   
 
-  inline Kernel::Kernel(const std::shared_ptr<Program> &program, const char *name)
-    : program(program)
-  {
-    cl_int ret;
-    PING;
-    PRINT(name);
-    this->handle = clCreateKernel(program->handle, name, &ret);
-    if (ret != CL_SUCCESS) {
-      PRINT(ret);
-      throw std::runtime_error("error in clHelper::Kernel (clCreateKernel) : "+clErrorString(ret));
-    }
-  }
-
-  
-
-  inline Program::Program(const std::shared_ptr<Context> &context, const std::string &code)
-    : context(context)
-  {
-    const char  *source_str  = code.c_str();
-    const size_t source_size = code.size();
-    cl_int ret;
-    this->handle
-      = clCreateProgramWithSource(context->handle, 1, (const char **)&source_str,
-                                  (const size_t *)&source_size, &ret);
-    if (ret != CL_SUCCESS)
-      throw std::runtime_error("error in clHelper::Program (from clCreateProgramWithSource) : "+clErrorString(ret));
-    /* Build Kernel Program */
-    ret = clBuildProgram(this->handle, 1, &context->device->clDeviceID, NULL, NULL, NULL);
-    if (ret != CL_SUCCESS) {
-      
-      size_t len;
-      char *buffer;
-      clGetProgramBuildInfo(this->handle, context->device->clDeviceID, CL_PROGRAM_BUILD_LOG, 0, NULL, &len);
-      buffer = (char *)malloc(len+1);
-      clGetProgramBuildInfo(this->handle, context->device->clDeviceID, CL_PROGRAM_BUILD_LOG, len, buffer, NULL);
-      printf("%s\n", buffer);
-
-      throw std::runtime_error("error in clHelper::Program (from clBuildProgram) : "+clErrorString(ret));
-    }
-  }
-
 
 
   struct KernelArgs {
