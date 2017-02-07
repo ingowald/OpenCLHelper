@@ -65,7 +65,7 @@ namespace clHelper {
 
 
   
-void Kernel::run(const KernelArgs &args)
+  void Kernel::run(const KernelArgs &args, size_t numThreads)
   {
     cl_int ret;
     const unsigned char *in = args.argMem.data();
@@ -77,7 +77,7 @@ void Kernel::run(const KernelArgs &args)
       in += sz_i;
     };
 
-    size_t width = 1;
+    size_t width = numThreads;
     size_t height = 1;
     size_t global_work_size[2] = { width, height };
     // size_t local_work_size[2] = { 8, 8 };

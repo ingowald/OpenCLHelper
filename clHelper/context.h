@@ -30,7 +30,7 @@ namespace clHelper {
     ~Kernel() {
       throw std::runtime_error("not yet releasing kernel ... ");
     }
-    void run(const KernelArgs &args);
+    void run(const KernelArgs &args, size_t numThreads=1);
 
     std::shared_ptr<Program> program;
     cl_kernel handle { 0 };
