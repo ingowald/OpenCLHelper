@@ -4,6 +4,8 @@ ADD_LIBRARY(clHelperLib
   embeddedProgram.cpp
   device.cpp
   buffer.cpp
+  program.cpp
+  kernel.cpp
   platform.cpp
   context.cpp
   )

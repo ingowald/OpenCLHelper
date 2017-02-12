@@ -17,26 +17,38 @@
 #pragma once
 
 #include "device.h"
-#include "kernel.h"
-#include "program.h"
 
-/*! c++ wrappers for opencl buffer objects - not yet implemented */
 namespace clHelper {
 
-  /*! abstracts a memory region on the device */
-  struct Context : std::enable_shared_from_this<Context> {
-    
-    Context(const std::shared_ptr<Device> &device);
-    
-    ~Context();
-    
-    static std::shared_ptr<Context> create(const std::shared_ptr<Device> &device);
-    
-    std::shared_ptr<Program> createProgram(const std::string &code);
+  struct Program;
 
-    std::shared_ptr<Device> device;
-    cl_context              handle       { 0 };
-    cl_command_queue        commandQueue { 0 };
+  /*! a sigle opencl kernel in a opencl program */
+  struct Kernel : std::enable_shared_from_this<Kernel>  {
+
+    /*! helper function to set up kernel arguments. Use in the form of
+      kernel.run(Kernel::Args().add(...).add(...).add(...) */
+    struct Args {
+      Args() {};
+      
+      /*! add a buffer object to the list of kernel args */
+      Args &add(const std::shared_ptr<DeviceBuffer> &buffer);
+      
+      /*! add raw memory region to list of kernel args */
+      Args &add(const void *ptr, size_t size);
+    private:
+      friend class clHelper::Kernel;
+      
+      std::vector<size_t> argSize;
+      std::vector<uint8_t> argMem;
+    };
+    
+    Kernel(const std::shared_ptr<Program> &program, const char *name);
+    ~Kernel();
+    void run(const Kernel::Args &args, size_t globalSize=1, size_t localSize=1);
+
+  private:
+    std::shared_ptr<Program> program;
+    cl_kernel handle { 0 };
   };
   
-}
+} // ::clHelper

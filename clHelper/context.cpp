@@ -20,73 +20,34 @@
 /*! c++ wrappers for opencl buffer objects - not yet implemented */
 namespace clHelper {
 
-  KernelArgs &KernelArgs::add(const std::shared_ptr<DeviceBuffer> buffer)
+  Context::Context(const std::shared_ptr<Device> &device)
   {
-    return add(&buffer->handle,sizeof(buffer->handle));
-  }
-
-    Kernel::Kernel(const std::shared_ptr<Program> &program, const char *name)
-    : program(program)
-  {
-    cl_int ret;
-    this->handle = clCreateKernel(program->handle, name, &ret);
-    if (ret != CL_SUCCESS) {
-      throw std::runtime_error("error in clHelper::Kernel (clCreateKernel) : "+clErrorString(ret));
-    }
-  }
-
-  
-
-  Program::Program(const std::shared_ptr<Context> &context, const std::string &code)
-    : context(context)
-  {
-    const char  *source_str  = code.c_str();
-    const size_t source_size = code.size();
-    cl_int ret;
-    this->handle
-      = clCreateProgramWithSource(context->handle, 1, (const char **)&source_str,
-                                  (const size_t *)&source_size, &ret);
+    cl_int ret = 0;
+    assert(device);
+    this->device = device;
+    this->handle = clCreateContext(NULL, 1, &device->clDeviceID, NULL, NULL, &ret);
     if (ret != CL_SUCCESS)
-      throw std::runtime_error("error in clHelper::Program (from clCreateProgramWithSource) : "+clErrorString(ret));
-    /* Build Kernel Program */
-    ret = clBuildProgram(this->handle, 1, &context->device->clDeviceID, NULL, NULL, NULL);
-    if (ret != CL_SUCCESS) {
-      
-      size_t len;
-      char *buffer;
-      clGetProgramBuildInfo(this->handle, context->device->clDeviceID, CL_PROGRAM_BUILD_LOG, 0, NULL, &len);
-      buffer = (char *)malloc(len+1);
-      clGetProgramBuildInfo(this->handle, context->device->clDeviceID, CL_PROGRAM_BUILD_LOG, len, buffer, NULL);
-      printf("%s\n", buffer);
-
-      throw std::runtime_error("error in clHelper::Program (from clBuildProgram) : "+clErrorString(ret));
-    }
-  }
-
-
-  
-  void Kernel::run(const KernelArgs &args, size_t numThreads)
-  {
-    cl_int ret;
-    const unsigned char *in = args.argMem.data();
-    for (int i=0;i<args.argSize.size();i++) {
-      size_t sz_i = args.argSize[i];
-      ret = clSetKernelArg(handle, i, sz_i,  (void *)in);
-      if (ret != CL_SUCCESS)
-        throw std::runtime_error("error in clHelper::Kernel::run (clSetKernelArgs) : "+clErrorString(ret));
-      in += sz_i;
-    };
-
-    size_t width = numThreads;
-    size_t height = 1;
-    size_t global_work_size[2] = { width, height };
-    // size_t local_work_size[2] = { 8, 8 };
-    ret = clEnqueueNDRangeKernel(program->context->commandQueue, this->handle, 2,
-                                 NULL, global_work_size, NULL,
-                                 0, NULL, NULL);
+      throw std::runtime_error("error in clHelper::Context (from clCreateContext)");
+    
+    commandQueue = clCreateCommandQueue(this->handle, device->clDeviceID, 0, &ret); 
     if (ret != CL_SUCCESS)
-        throw std::runtime_error("error in clHelper::Kernel::run (clEnqueueNDRangeKernel)");
+      throw std::runtime_error("error in clHelper::Context (from clCreateCommandQueue)");
   }
+  
+  Context::~Context()
+  {
+    throw std::runtime_error("releasing cl contexts not yet implemneted");
+  }
+
+  std::shared_ptr<Context> Context::create(const std::shared_ptr<Device> &device)
+  {
+    return std::make_shared<Context>(device);
+  }
+  
+  std::shared_ptr<Program> Context::createProgram(const std::string &code)
+  {
+    return std::make_shared<Program>(shared_from_this(),code);
+  };
   
 
 }
