@@ -25,13 +25,7 @@ namespace clHelper {
     : program(program)
   {
     cl_int ret;
-    PING;
-    PRINT(name);
-    PING;
     this->handle = clCreateKernel(program->handle, name, &ret);
-    PING;
-    PRINT(name);
-    PING;
     if (ret != CL_SUCCESS) {
       throw std::runtime_error("error in clHelper::Kernel (clCreateKernel) : "+clErrorString(ret));
     }
