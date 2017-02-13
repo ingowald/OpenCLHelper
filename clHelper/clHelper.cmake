@@ -228,6 +228,12 @@ MACRO (COMPILE_OPENCL)
       # encodes the entire path of the input file as name of the
       # kernel
       # ------------------------------------------------------------------
+
+      IF (INTEL_OPENCL_COMPILER)
+	SET(outputs ${preproc_file} ${deps} ${asm_file} ${ll_file})
+      ELSE()
+	SET(outputs ${preproc_file} ${deps})
+      ENDIF()
       FILE(RELATIVE_PATH rel_embedded_file ${CMAKE_BINARY_DIR} ${embedded_file})
       FILE(RELATIVE_PATH rel_input ${clhelper_base_output_dir} ${preproc_file})
       message("{embedded_file} ${embedded_file}")
@@ -239,7 +245,7 @@ MACRO (COMPILE_OPENCL)
 	COMMAND xxd 
 	-i ${rel_input}
 	${embedded_file}
-	DEPENDS ${preproc_file} ${deps} ${asm_file} ${ll_file}
+	DEPENDS ${outputs}
 	COMMENT "embedding opencl code from ${src} -> ${rel_embedded_file}"
 	)
     ENDIF() 
