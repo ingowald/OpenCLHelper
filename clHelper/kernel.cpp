@@ -18,6 +18,8 @@
 #include "program.h"
 #include "context.h"
 #include "buffer.h"
+// std
+#include <sstream>
 
 namespace clHelper {
 
@@ -38,6 +40,46 @@ namespace clHelper {
   }
 
   
+  /*! return kernel info (such as local mem size, private mem size, preferrred warp size, etc, as a string */
+  std::string Kernel::getWorkGroupInfoString()
+  {
+    std::stringstream ss;
+    ss << "Kernel Work Group Information:" << std::endl;
+
+    size_t workGroupSize;
+    clGetKernelWorkGroupInfo(handle,program->context->device->clDeviceID,
+                             CL_KERNEL_WORK_GROUP_SIZE,
+                             sizeof(workGroupSize),&workGroupSize,NULL);
+
+    ss << " - work group size        : " << workGroupSize << std::endl;
+
+    cl_ulong privateMemSize;
+    clGetKernelWorkGroupInfo(handle,program->context->device->clDeviceID,
+                             CL_KERNEL_PRIVATE_MEM_SIZE,
+                             sizeof(privateMemSize),&privateMemSize,NULL);
+    ss << " - private mem size       : " << privateMemSize << std::endl;
+
+        cl_ulong localMemSize;
+    clGetKernelWorkGroupInfo(handle,program->context->device->clDeviceID,
+                             CL_KERNEL_LOCAL_MEM_SIZE,
+                             sizeof(localMemSize),&localMemSize,NULL);
+    ss << " - local mem size         : " << localMemSize << std::endl;
+
+    size_t compileWorkGroupSize[3];
+    clGetKernelWorkGroupInfo(handle,program->context->device->clDeviceID,
+                             CL_KERNEL_COMPILE_WORK_GROUP_SIZE,
+                             sizeof(compileWorkGroupSize),&compileWorkGroupSize,NULL);
+    ss << " - compile wkgrp size     : " << compileWorkGroupSize[0] << "," << compileWorkGroupSize[1] << "," << compileWorkGroupSize[2] << std::endl;
+
+    size_t preferredWorkGroupSizeMultiple;
+    clGetKernelWorkGroupInfo(handle,program->context->device->clDeviceID,
+                             CL_KERNEL_PREFERRED_WORK_GROUP_SIZE_MULTIPLE,
+                             sizeof(preferredWorkGroupSizeMultiple),&preferredWorkGroupSizeMultiple,NULL);
+    ss << " - pref wokgrp (warp) size: " << preferredWorkGroupSizeMultiple << std::endl;
+    return ss.str();
+  }
+
+
   void Kernel::run(const Kernel::Args &args, size_t globalSize, size_t localSize)
   {
     cl_int ret;
@@ -48,7 +90,7 @@ namespace clHelper {
       if (ret != CL_SUCCESS)
         throw std::runtime_error("error in clHelper::Kernel::run (clSetKernelArgs) : "+clErrorString(ret));
       in += sz_i;
-    };
+    }
 
     size_t global_work_size[2] = { globalSize,0 };
     size_t local_work_size[2]  = { localSize,0 };

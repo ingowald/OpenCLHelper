@@ -45,7 +45,9 @@ namespace clHelper {
     Kernel(const std::shared_ptr<Program> &program, const char *name);
     ~Kernel();
     void run(const Kernel::Args &args, size_t globalSize=1, size_t localSize=1);
-
+    
+    /*! return kernel info (such as local mem size, private mem size, preferrred warp size, etc, as a string */
+    std::string getWorkGroupInfoString();
   private:
     std::shared_ptr<Program> program;
     cl_kernel handle { 0 };
