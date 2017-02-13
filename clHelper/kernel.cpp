@@ -56,8 +56,20 @@ namespace clHelper {
     ret = clEnqueueNDRangeKernel(program->context->commandQueue, this->handle, 1,
                                  NULL, global_work_size, local_work_size,
                                  0, NULL, NULL);
-    if (ret != CL_SUCCESS)
-        throw std::runtime_error("error in clHelper::Kernel::run (clEnqueueNDRangeKernel)");
+    if (ret != CL_SUCCESS) {
+      const std::string err = "error in clHelper::Kernel::run (clEnqueueNDRangeKernel)"+clErrorString(ret);
+      PING;
+      PRINT(err);
+      throw std::runtime_error(err);
+    }
+
+    ret = clFinish(program->context->commandQueue);
+    if (ret != CL_SUCCESS) {
+      const std::string err = "error in clHelper::Kernel::run (clFinish) "+clErrorString(ret);
+      PING;
+      PRINT(err);
+      throw std::runtime_error(err);
+    }
   }
 
   
