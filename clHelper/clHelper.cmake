@@ -200,6 +200,7 @@ MACRO (COMPILE_OPENCL)
       ADD_CUSTOM_COMMAND(
 	OUTPUT ${asm_file}
 	COMMAND ${INTEL_OPENCL_COMPILER}
+	-device=cpu
 	-cmd=build
 	-input=${preproc_file}
 	-asm=${asm_file}
@@ -214,6 +215,7 @@ MACRO (COMPILE_OPENCL)
       ADD_CUSTOM_COMMAND(
 	OUTPUT ${ll_file}
 	COMMAND ${INTEL_OPENCL_COMPILER}
+	-device=cpu
 	-cmd=build
 	-input=${preproc_file}
 	-llvm=${ll_file}

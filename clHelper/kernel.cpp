@@ -100,16 +100,12 @@ namespace clHelper {
                                  0, NULL, NULL);
     if (ret != CL_SUCCESS) {
       const std::string err = "error in clHelper::Kernel::run (clEnqueueNDRangeKernel)"+clErrorString(ret);
-      PING;
-      PRINT(err);
       throw std::runtime_error(err);
     }
 
     ret = clFinish(program->context->commandQueue);
     if (ret != CL_SUCCESS) {
       const std::string err = "error in clHelper::Kernel::run (clFinish) "+clErrorString(ret);
-      PING;
-      PRINT(err);
       throw std::runtime_error(err);
     }
   }
