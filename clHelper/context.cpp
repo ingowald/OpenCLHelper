@@ -36,7 +36,10 @@ namespace clHelper {
   
   Context::~Context()
   {
-    throw std::runtime_error("releasing cl contexts not yet implemneted");
+    // uncommenting this, else this masks any other exceptions that
+    // get thrown during runtime...
+
+    // throw std::runtime_error("releasing cl contexts not yet implemneted");
   }
 
   std::shared_ptr<Context> Context::create(const std::shared_ptr<Device> &device)
