@@ -50,7 +50,7 @@ namespace clHelper {
   /*! destructor - release the opencl handle and clean up */
   Program::~Program()
   {
-    throw std::runtime_error("not yet releasing kernel ... ");
+    clReleaseProgram(this->handle);
   }
   
 

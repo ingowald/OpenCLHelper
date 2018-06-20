@@ -36,7 +36,7 @@ namespace clHelper {
   
   Kernel::~Kernel()
   {
-    throw std::runtime_error("not yet releasing kernel ... ");
+    clReleaseKernel(this->handle);
   }
 
   

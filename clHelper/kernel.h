@@ -38,7 +38,7 @@ namespace clHelper {
     private:
       friend class clHelper::Kernel;
       
-      std::vector<size_t> argSize;
+      std::vector<size_t>  argSize;
       std::vector<uint8_t> argMem;
     };
     

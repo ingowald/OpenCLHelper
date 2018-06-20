@@ -40,6 +40,8 @@ namespace clHelper {
       if (*s == '/') *s = '_';
     }
 
+    printf("symbol %s\n",kernel_ptr_symbol_name);
+
     void *kernel_ptr_symbol = dlsym(NULL,kernel_ptr_symbol_name);
     if (!kernel_ptr_symbol) return NULL;
     
