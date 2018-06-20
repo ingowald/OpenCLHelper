@@ -80,7 +80,10 @@ namespace clHelper {
   }
 
 
-  void Kernel::run(const Kernel::Args &args, size_t globalSize, size_t localSize)
+  void Kernel::run(const Kernel::Args &args, 
+                   size_t globalSize, 
+                   size_t localSize,
+                   bool forceFinish)
   {
     cl_int ret;
     const unsigned char *in = args.argMem.data();
@@ -103,10 +106,12 @@ namespace clHelper {
       throw std::runtime_error(err);
     }
 
-    ret = clFinish(program->context->commandQueue);
-    if (ret != CL_SUCCESS) {
-      const std::string err = "error in clHelper::Kernel::run (clFinish) "+clErrorString(ret);
-      throw std::runtime_error(err);
+    if (forceFinish) {
+      ret = clFinish(program->context->commandQueue);
+      if (ret != CL_SUCCESS) {
+        const std::string err = "error in clHelper::Kernel::run (clFinish) "+clErrorString(ret);
+        throw std::runtime_error(err);
+      }
     }
   }
 

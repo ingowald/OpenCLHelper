@@ -42,6 +42,12 @@ namespace clHelper {
       throw std::runtime_error("error in clHelper::DeviceBuffer (clCreateBuffer)");
   };
 
+  /*! destroy the device-size buffer */
+  DeviceBuffer::~DeviceBuffer() 
+  { 
+    clReleaseMemObject(handle);
+  }
+
   /*! write given data into the buffer - size must match buffer size */
   void DeviceBuffer::write(const void *data, size_t size)
   {

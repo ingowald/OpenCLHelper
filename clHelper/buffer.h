@@ -30,7 +30,7 @@ namespace clHelper {
                  const size_t size);
 
     /*! destroy the device-size buffer */
-    ~DeviceBuffer() { throw std::runtime_error("releasing buffers not yet implemneted"); }
+    ~DeviceBuffer();
 
     /*! write given data into the buffer - size must match buffer size */
     void write(const void *data, size_t size);

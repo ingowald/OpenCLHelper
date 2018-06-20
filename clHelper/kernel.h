@@ -35,6 +35,12 @@ namespace clHelper {
       
       /*! add raw memory region to list of kernel args */
       Args &add(const void *ptr, size_t size);
+
+      /*! add a single int parameter */
+      Args &add(const int i) { return add(&i,sizeof(i)); }
+
+      /*! add a single float parameter */
+      Args &add(const float f) { return add(&f,sizeof(f)); }
     private:
       friend class clHelper::Kernel;
       
@@ -44,7 +50,10 @@ namespace clHelper {
     
     Kernel(const std::shared_ptr<Program> &program, const char *name);
     ~Kernel();
-    void run(const Kernel::Args &args, size_t globalSize=1, size_t localSize=1);
+    void run(const Kernel::Args &args, 
+             size_t globalSize=1, 
+             size_t localSize=1,
+             bool forceFinish=true);
     
     /*! return kernel info (such as local mem size, private mem size, preferrred warp size, etc, as a string */
     std::string getWorkGroupInfoString();
