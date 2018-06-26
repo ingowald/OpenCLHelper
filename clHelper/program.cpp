@@ -33,7 +33,8 @@ namespace clHelper {
     if (ret != CL_SUCCESS)
       throw std::runtime_error("error in clHelper::Program (from clCreateProgramWithSource) : "+clErrorString(ret));
     /* Build Kernel Program */
-    ret = clBuildProgram(this->handle, 1, &context->device->clDeviceID, NULL, NULL, NULL);
+    ret = clBuildProgram(this->handle, 1, &context->device->clDeviceID, 
+                         "-cl-std=CL2.0", NULL, NULL);
     if (ret != CL_SUCCESS) {
       
       size_t len;
