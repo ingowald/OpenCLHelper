@@ -204,6 +204,7 @@ MACRO (COMPILE_OPENCL)
 	-cmd=build
 	-input=${preproc_file}
 	-asm=${asm_file}
+	-bo="-cl-std=CL2.0"
 	DEPENDS ${preproc_file}
 	COMMENT "test-compiling ${rel_preproc_file} -> ${rel_asm_file}"
 	)
@@ -219,6 +220,7 @@ MACRO (COMPILE_OPENCL)
 	-cmd=build
 	-input=${preproc_file}
 	-llvm=${ll_file}
+	-bo="-cl-std=CL2.0"
 	DEPENDS ${preproc_file}
 	COMMENT "test-compiling ${rel_preproc_file} -> ${rel_ll_file}"
 	)
