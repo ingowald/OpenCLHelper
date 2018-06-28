@@ -51,6 +51,7 @@ namespace clHelper {
   /*! destructor - release the opencl handle and clean up */
   Program::~Program()
   {
+    printf("RELEASING program!!!!\n");
     clReleaseProgram(this->handle);
   }
   

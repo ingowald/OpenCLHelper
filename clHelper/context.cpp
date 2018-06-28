@@ -32,6 +32,24 @@ namespace clHelper {
     commandQueue = clCreateCommandQueue(this->handle, device->clDeviceID, 0, &ret); 
     if (ret != CL_SUCCESS)
       throw std::runtime_error("error in clHelper::Context (from clCreateCommandQueue)");
+
+    
+    cl_queue_properties devQueueProps[] 
+      = {  CL_QUEUE_PROPERTIES, 
+           CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE 
+           |CL_QUEUE_ON_DEVICE
+           |CL_QUEUE_ON_DEVICE_DEFAULT
+           ,  
+           CL_QUEUE_SIZE, 
+           32*1024
+           , 
+           0 };
+    
+    deviceCommandQueue
+      = clCreateCommandQueueWithProperties(this->handle, device->clDeviceID, 
+                                           devQueueProps, &ret);
+    if (ret != CL_SUCCESS)
+      throw std::runtime_error("error in clHelper::Context - could not create *device* command queue)");
   }
   
   Context::~Context()

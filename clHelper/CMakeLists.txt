@@ -1,6 +1,6 @@
 INCLUDE(clHelper.cmake)
 
-ADD_LIBRARY(clHelperLib
+ADD_LIBRARY(clHelperLib SHARED
   embeddedProgram.cpp
   device.cpp
   buffer.cpp
@@ -9,7 +9,7 @@ ADD_LIBRARY(clHelperLib
   platform.cpp
   context.cpp
   )
-TARGET_LINK_LIBRARIES(clHelperLib
+TARGET_LINK_LIBRARIES(clHelperLib 
   ${OpenCL_LIBRARY}
   dl
   )

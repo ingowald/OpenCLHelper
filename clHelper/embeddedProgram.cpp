@@ -30,7 +30,7 @@ namespace clHelper {
     char kernel_len_symbol_name[10000];
     // sprintf(kernel_len_symbol_name,"_expanded_opencl__%s_len",fileName);
     sprintf(kernel_len_symbol_name,"%s_len",fileName);
-  
+
     for (char *s = kernel_ptr_symbol_name; *s; s++) {
       if (*s == '.') *s = '_';
       if (*s == '/') *s = '_';
@@ -40,12 +40,17 @@ namespace clHelper {
       if (*s == '/') *s = '_';
     }
 
-    printf("symbol %s\n",kernel_ptr_symbol_name);
+    printf("symbols %s %s\n",kernel_ptr_symbol_name,kernel_len_symbol_name);
 
-    void *kernel_ptr_symbol = dlsym(NULL,kernel_ptr_symbol_name);
+    void *mainProgram = dlopen(NULL,RTLD_NOW|RTLD_GLOBAL);
+    printf("main program dlopen %lx\n",(size_t)mainProgram);
+
+    void *kernel_ptr_symbol = dlsym(mainProgram,kernel_ptr_symbol_name);
+    printf("kernel_ptr_symbol %lx\n",(size_t)kernel_ptr_symbol);
     if (!kernel_ptr_symbol) return NULL;
     
-    void *kernel_len_symbol = dlsym(NULL,kernel_len_symbol_name);
+    void *kernel_len_symbol = dlsym(mainProgram,kernel_len_symbol_name);
+    printf("kernel_len_symbol %lx\n",(size_t)kernel_len_symbol);
     if (!kernel_len_symbol) return NULL;
     
     *kernelLength = *(unsigned int *)kernel_len_symbol;

@@ -37,6 +37,7 @@ namespace clHelper {
     std::shared_ptr<Device> device;
     cl_context              handle       { 0 };
     cl_command_queue        commandQueue { 0 };
+    cl_command_queue        deviceCommandQueue { 0 };
   };
   
 }
